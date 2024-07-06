@@ -28,5 +28,67 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          title: const Text('Login', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.blue),
+      body: Column(
+        children: [
+          TextField(
+              controller: _email,
+              enableSuggestions: false,
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                hintText: 'Enter your email here',
+              )),
+          TextField(
+              controller: _password,
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                hintText: 'Enter your password here',
+              )),
+          TextButton(
+            onPressed: () async {
+              final email = _email.text;
+              final password = _password.text;
+              try {
+                final userCredential = await FirebaseAuth.instance
+                    .signInWithEmailAndPassword(
+                        email: email, password: password);
+                print(userCredential);
+              } on FirebaseAuthException catch (e) {
+                if (e.code == 'user-not-found') {
+                  print('No user found for that email.');
+                } else if (e.code == 'wrong-password') {
+                  print('Wrong password provided for that user.');
+                } else if (e.code == 'invalid-credential') {
+                  print('Invalid credential provided.');
+                }
+              } catch (e) {
+                print(e);
+                print(e.runtimeType);
+                print('Something bad happened!');
+              }
+            },
+            child: const Text('Login', style: TextStyle(color: Colors.blue)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/register/',
+                (route) => false,
+              );
+            },
+            child: const Text('Not registered yet? Register Here!',
+                style: TextStyle(color: Colors.blue)),
+          )
+        ],
+      ),
+    );
+  }
 }
