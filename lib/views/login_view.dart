@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:mynotes/firebase_options.dart';
+import 'dart:developer' as devtools show log;
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -57,22 +58,29 @@ class _LoginViewState extends State<LoginView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                final userCredential = await FirebaseAuth.instance
-                    .signInWithEmailAndPassword(
-                        email: email, password: password);
-                print(userCredential);
+                final userCredential =
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  email: email,
+                  password: password,
+                );
+                devtools.log('User: ${userCredential.user}');
+
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/notes/',
+                  (route) => false,
+                );
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'user-not-found') {
-                  print('No user found for that email.');
+                  devtools.log('No user found for that email.');
                 } else if (e.code == 'wrong-password') {
-                  print('Wrong password provided for that user.');
+                  devtools.log('Wrong password provided for that user.');
                 } else if (e.code == 'invalid-credential') {
-                  print('Invalid credential provided.');
+                  devtools.log('Invalid credential provided.');
                 }
               } catch (e) {
-                print(e);
-                print(e.runtimeType);
-                print('Something bad happened!');
+                devtools.log(e.toString());
+                devtools.log(e.runtimeType.toString());
               }
             },
             child: const Text('Login', style: TextStyle(color: Colors.blue)),
