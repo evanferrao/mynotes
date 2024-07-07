@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'evans-flutter-notes.firebaseapp.com',
     storageBucket: 'evans-flutter-notes.appspot.com',
   );
+
 }
