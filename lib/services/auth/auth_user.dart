@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 
 @immutable
 class AuthUser {
+  final String? email;
+  // String? because firebase getter of string is String? and we are using it directly
   final bool isEmailVerified;
-  const AuthUser({required this.isEmailVerified});
+  const AuthUser({
+    required this.email,
+    required this.isEmailVerified,
+  });
 
   factory AuthUser.fromFirebase(User user) =>
-      AuthUser(isEmailVerified: user.emailVerified);
+      AuthUser(email: user.email, isEmailVerified: user.emailVerified);
+  // firebase has a email getter so we can use it directly
 }

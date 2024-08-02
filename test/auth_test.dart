@@ -118,7 +118,7 @@ class MockAuthProvider implements AuthProvider {
     if (!isInitialized) throw NotInitializedAuthException();
     if (email == 'foo@bar.com') throw UserNotFoundAuthException();
     if (password == 'foobar') throw WrongPasswordAuthException();
-    var user = AuthUser(isEmailVerified: false);
+    var user = AuthUser(isEmailVerified: false, email: email);
     _user = user;
     return Future.value(user);
     // what is the difference between Future.value and Future.delayed?
@@ -141,7 +141,7 @@ class MockAuthProvider implements AuthProvider {
     if (!isInitialized) throw NotInitializedAuthException();
     final user = _user;
     if (user == null) throw UserNotFoundAuthException();
-    var newUser = AuthUser(isEmailVerified: true);
+    var newUser = AuthUser(isEmailVerified: true, email: user.email);
     _user = newUser;
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mynotes/services/crud/crud_crudexceptions.dart';
 import 'package:sqflite/sqflite.dart';
@@ -7,12 +9,47 @@ import 'package:path/path.dart';
 class NotesService {
   Database? _db;
 
+  List<DatabaseNote> _notes = [];
+
+  // the three lines below are a hack for making a singelton
+  static final NotesService _shared = NotesService._sharedInstance();
+  NotesService._sharedInstance();
+  factory NotesService() => _shared;
+
+  final _notesStreamController =
+      StreamController<List<DatabaseNote>>.broadcast();
+
+  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+
+  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+    try {
+      final user = await getUser(email: email);
+      return user;
+    } on CouldNotFindUser {
+      final user = createUser(email: email);
+      return user;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> _cacheNotes() async {
+    final notes = await getAllNotes();
+    _notes = notes.toList();
+    _notesStreamController.add(_notes);
+  }
+
   Future<DatabaseNote> updateNote({
     required DatabaseNote note,
     required String text,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
+
+    // make sure note exists in the database
     await getNote(id: note.id);
+
+    // update db
     final updatesCount = await db.update(noteTable, {
       textColumn: text,
       isSyncedWithCloudColumn: 0,
@@ -21,25 +58,32 @@ class NotesService {
     if (updatesCount == 0) {
       throw CouldNotUpdateNote();
     } else {
-      return await getNote(id: note.id);
+      final updatedNote = await getNote(id: note.id);
+      _notes.removeWhere((note) => note.id == updatedNote.id);
+      _notes.add(updatedNote);
+      _notesStreamController.add(_notes);
+      return updatedNote;
     }
   }
 
-  Future<Iterable<DatabaseNote>> getAllNote({required int id}) async {
+  Future<Iterable<DatabaseNote>> getAllNotes() async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final notes = await db.query(
       noteTable,
     );
     return notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
+    // IMPORTANT: see the examples in https://www.coffeeclass.io/articles/map-function-with-dart-lists
     // where is noteRow coming from?
     // The noteRow variable is a parameter of the map method. The map method is called on the notes list, which is a list of rows returned by the query method. The map method takes a function as an argument and applies that function to each element of the list. In this case, the function is an anonymous function that takes a row as a parameter and returns a DatabaseNote object created from that row.
     // what is the type of noteRow?
     // The type of noteRow is Map<String, Object?>. This is the type of the rows returned by the query method. Each row is a map where the keys are column names and the values are the corresponding values in the row.
-    // but noteRow is not defined in the function getAllNote?
+    // but noteRow is not defined in the function getAllNotes?
     // The noteRow variable is a parameter of the anonymous function passed to the map method. The map method applies the function to each element of the list and passes the element as an argument to the function. In this case, the element is a row returned by the query method, and the function creates a DatabaseNote object from that row.
   }
 
   Future<DatabaseNote> getNote({required int id}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final notes = await db.query(
       noteTable,
@@ -50,16 +94,28 @@ class NotesService {
     if (notes.isEmpty) {
       throw CouldNotFindNote();
     } else {
-      return DatabaseNote.fromRow(notes.first);
+      final note = DatabaseNote.fromRow(notes.first);
+      // since we are fetching a new version, we should first remove the old version from the cache
+      _notes.removeWhere((note) => note.id == id);
+      _notes.add(note);
+      _notesStreamController.add(_notes);
+      return note;
     }
   }
 
   Future<int> deleteAllNotes() async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-    return await db.delete(noteTable);
+    final numberOfDeletions = await db.delete(noteTable);
+    _notes.clear();
+    // _notes.clear(); vs _notes = [];
+    // The _notes.clear() method removes all elements from the _notes list, but it does not create a new list. The _notes = [] statement creates a new empty list and assigns it to the _notes variable. In this case, both methods have the same effect because the _notes list is not shared with other objects.
+    _notesStreamController.add(_notes);
+    return numberOfDeletions;
   }
 
   Future<void> deleteNote({required int id}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final deletedCount = await db.delete(
       noteTable,
@@ -68,10 +124,14 @@ class NotesService {
     );
     if (deletedCount == 0) {
       throw CouldNotDeleteNote();
+    } else {
+      _notes.removeWhere((note) => note.id == id);
+      _notesStreamController.add(_notes);
     }
   }
 
   Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final dbUser = await getUser(email: owner.email);
 
@@ -94,10 +154,14 @@ class NotesService {
       text: text,
       isSyncedWithCloud: true,
     );
+
+    _notes.add(note);
+    _notesStreamController.add(_notes);
     return note;
   }
 
   Future<DatabaseUser> getUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final user = await db.query(
       userTable,
@@ -113,6 +177,7 @@ class NotesService {
   }
 
   Future<DatabaseUser> createUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       userTable,
@@ -132,6 +197,7 @@ class NotesService {
   }
 
   Future<void> deleteUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final deletedCount = await db.delete(
       userTable,
@@ -162,6 +228,14 @@ class NotesService {
     }
   }
 
+  Future<void> _ensureDbIsOpen() async {
+    try {
+      await open();
+    } on DatabaseAlreadyOpenException {
+      // do nothing
+    }
+  }
+
   Future<void> open() async {
     if (_db != null) {
       throw DatabaseAlreadyOpenException();
@@ -176,6 +250,7 @@ class NotesService {
       await db.execute(createUserTable);
       // Create the notes tables if they don't exist
       await db.execute(createnoteTable);
+      await _cacheNotes();
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectory();
     }
