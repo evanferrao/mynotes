@@ -1,0 +1,91 @@
+[33mcommit f758264a8292ddb6ea2637bcce7ee0b0edf2cb8c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;33mtag: step13[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Sat Aug 3 14:15:43 2024 +0530
+
+    mynotes: add NewNoteRoute
+
+[33mcommit 751fcfccb4e408865b2c58ab82a06919b6b165c0[m[33m ([m[1;33mtag: step12[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Fri Aug 2 13:03:27 2024 +0530
+
+    mynotes: Add streambuilder in UI along with initialize and dispose NotesService in NotesView
+
+[33mcommit 93164afa7cb12808e575be505183259457f98ed9[m[33m ([m[1;33mtag: step11[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Tue Jul 30 12:33:05 2024 +0530
+
+    mynotes: Implement CRUD operations using sqlite
+
+[33mcommit 68854afae663fa769527b3bc3719770ef87682f6[m[33m ([m[1;33mtag: step10[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Tue Jul 23 10:29:28 2024 +0530
+
+    mynotes: Add tests
+
+[33mcommit 6a391c23cdcfa1bd1928707f4ab033e469e0910a[m[33m ([m[1;33mtag: step9[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Sun Jul 21 12:52:12 2024 +0530
+
+    mynotes: use AuthService at the UI level
+
+[33mcommit 843631195ad2a79bfb5985b1bcf668d5e5560148[m[33m ([m[1;33mtag: step8[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Wed Jul 17 13:16:22 2024 +0530
+
+    mynotes: Implement auth service
+
+[33mcommit 4bfe0acf49dbda3c820950d2174e23775d01ddee[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Wed Jul 10 18:14:00 2024 +0530
+
+    mynotes: Prevent login if user hasn't verified email
+
+[33mcommit 4939850724fc1388183faba1932b5bf57fa23079[m[33m ([m[1;33mtag: step7[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Wed Jul 10 17:13:17 2024 +0530
+
+    mynotes: Improve email verification
+
+[33mcommit a2c2b9570dbc4de98ad50ce0bc6d7e690ed9a978[m[33m ([m[1;33mtag: step6[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Mon Jul 8 05:08:33 2024 +0530
+
+    mynotes: add error popup in login page
+
+[33mcommit c6944a1f7b921f37ea9e554197ce29549d11df6c[m[33m ([m[1;33mtag: step5[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Mon Jul 8 04:37:27 2024 +0530
+
+    mynotes: Avoid repeated hardcoded values
+
+[33mcommit 8258bcf56a08a4f486489746efbed763f778b406[m[33m ([m[1;33mtag: step4[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Mon Jul 8 04:25:37 2024 +0530
+
+    mynotes: use logger instead of print
+    
+    also redirect to /notes/ upon login
+
+[33mcommit 8c335a41a232ec7c6e95efe9c10d1060e5818659[m[33m ([m[1;33mtag: step3[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Mon Jul 8 03:09:46 2024 +0530
+
+    mynotes: Add logout screen
+
+[33mcommit 7ab25055851281b1e88c71ff31c52d5049d074a3[m
+Author: evanferrao <evanferrao@gmail.com>
+Date:   Sun Jul 7 10:22:01 2024 +0000
+
+    mynotes: misc: add google idx config
+
+[33mcommit 00e9bfef1221391a269027f4cbe25ddeb7abfa5a[m[33m ([m[1;33mtag: step2[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Sun Jul 7 02:25:00 2024 +0530
+
+    mynotes: Add verify email & improve logic of login_view and register_view
+
+[33mcommit 7e499836af5775b9ef3bcc6f6bdc0bc16ffaaa38[m[33m ([m[1;33mtag: step1[m[33m)[m
+Author: Evan Ferrao <evanferrao@gmail.com>
+Date:   Sat Jul 6 19:07:59 2024 +0530
+
+    mynotes: Initial Commit
