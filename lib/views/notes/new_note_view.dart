@@ -3,10 +3,10 @@ import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/services/crud/notes_service.dart';
 
 class NewNoteView extends StatefulWidget {
-  const NewNoteView({super.key});
+  const NewNoteView({Key? key}) : super(key: key);
 
   @override
-  State<NewNoteView> createState() => _NewNoteViewState();
+  _NewNoteViewState createState() => _NewNoteViewState();
 }
 
 class _NewNoteViewState extends State<NewNoteView> {
@@ -56,7 +56,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     }
   }
 
-  void _saveNoteIfTextIsNotEmpty() async {
+  void _saveNoteIfTextNotEmpty() async {
     final note = _note;
     final text = _textController.text;
     if (note != null && text.isNotEmpty) {
@@ -70,7 +70,7 @@ class _NewNoteViewState extends State<NewNoteView> {
   @override
   void dispose() {
     _deleteNoteIfTextIsEmpty();
-    _saveNoteIfTextIsNotEmpty();
+    _saveNoteIfTextNotEmpty();
     _textController.dispose();
     super.dispose();
   }
@@ -90,31 +90,25 @@ class _NewNoteViewState extends State<NewNoteView> {
         ),
       ),
       body: FutureBuilder(
-          future: createNewNote(),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                // temporary fix: I'm not sure why the type of snapshot.data is dynamic
-                // Im not sure which line to comment out and which to keep
-                // got this fix in youtube comments section
-                // without the ? in DatabaseNote? it throws an error which is shown below
-                // _CastError (type 'Null' is not a subtype of type 'int' in type cast)
-
-                _note = snapshot.data as DatabaseNote?;
-                //_note = snapshot.data;
-                _setupTextControllerListener();
-                return TextField(
-                  controller: _textController,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    hintText: 'Start typing your note here ...',
-                  ),
-                );
-              default:
-                return const CircularProgressIndicator();
-            }
-          }),
+        future: createNewNote(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              _note = snapshot.data as DatabaseNote;
+              _setupTextControllerListener();
+              return TextField(
+                controller: _textController,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  hintText: 'Start typing your note...',
+                ),
+              );
+            default:
+              return const CircularProgressIndicator();
+          }
+        },
+      ),
     );
   }
 }

@@ -1,24 +1,23 @@
-
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/auth_provider.dart';
 import 'package:mynotes/services/auth/auth_user.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Mock AUthenticatioin', () {
+  group('Mock Authentication', () {
     final provider = MockAuthProvider();
     test('Should not be initialized to begin with', () {
-      expect(provider.isInitialized, isFalse);
+      expect(provider.isInitialized, false);
     });
 
     test('Cannot log out if not initialized', () {
       expect(
         provider.logOut(),
-        throwsA(const TypeMatcher<NotInitializedAuthException>()),
+        throwsA(const TypeMatcher<NotInitializedException>()),
       );
     });
 
-    test('Should be able to initialize', () async {
+    test('Should be able to be initialized', () async {
       await provider.initialize();
       expect(provider.isInitialized, isTrue);
     });
@@ -30,14 +29,11 @@ void main() {
     test(
       'Should be able to initialize in less than 2 seconds',
       () async {
-        //final stopwatch = Stopwatch()..start();
         await provider.initialize();
         expect(provider.isInitialized, isTrue);
         //expect(stopwatch.elapsed, lessThan(const Duration(seconds: 2)));
       },
-      timeout: const Timeout(
-        Duration(seconds: 2),
-      ),
+      timeout: const Timeout(Duration(seconds: 2)),
     );
     // is timer better than stopwatch?
     // Stopwatch is better for measuring elapsed time in Dart because it is more accurate than Timer.
@@ -46,32 +42,37 @@ void main() {
         email: 'foo@bar.com',
         password: 'anypassword',
       );
+
       expect(badEmailUser,
           throwsA(const TypeMatcher<UserNotFoundAuthException>()));
-      final basPasswordUser = provider.createUser(
-        email: 'someone@wow.com',
+
+      final badPasswordUser = provider.createUser(
+        email: 'someone@bar.com',
         password: 'foobar',
       );
-      expect(basPasswordUser,
+      expect(badPasswordUser,
           throwsA(const TypeMatcher<WrongPasswordAuthException>()));
 
-      final user = await provider.createUser(email: 'foo', password: 'bar');
+      final user = await provider.createUser(
+        email: 'foo',
+        password: 'bar',
+      );
       expect(provider.currentUser, user);
-      expect(user.isEmailVerified, isFalse);
+      expect(user.isEmailVerified, false);
     });
 
-    test('Login user should be able to get verified', () async {
+    test('Logged in user should be able to get verified', () {
       provider.sendEmailVerification();
       final user = provider.currentUser;
       expect(user, isNotNull);
-      expect(user!.isEmailVerified, isTrue);
+      expect(user!.isEmailVerified, true);
     });
 
-    test('Should be able to log out and login in again', () async {
+    test('Should be able to log out and log in again', () async {
       await provider.logOut();
       await provider.logIn(
-        email: 'foo',
-        password: 'bar',
+        email: 'email',
+        password: 'password',
       );
       final user = provider.currentUser;
       expect(user, isNotNull);
@@ -79,7 +80,7 @@ void main() {
   });
 }
 
-class NotInitializedAuthException implements Exception {}
+class NotInitializedException implements Exception {}
 
 class MockAuthProvider implements AuthProvider {
   AuthUser? _user;
@@ -91,7 +92,7 @@ class MockAuthProvider implements AuthProvider {
     required String email,
     required String password,
   }) async {
-    if (!isInitialized) throw NotInitializedAuthException();
+    if (!isInitialized) throw NotInitializedException();
     await Future.delayed(const Duration(seconds: 1));
     return logIn(
       email: email,
@@ -100,7 +101,6 @@ class MockAuthProvider implements AuthProvider {
   }
 
   @override
-  // TODO: implement currentUser
   AuthUser? get currentUser => _user;
 
   @override
@@ -114,10 +114,13 @@ class MockAuthProvider implements AuthProvider {
     required String email,
     required String password,
   }) {
-    if (!isInitialized) throw NotInitializedAuthException();
+    if (!isInitialized) throw NotInitializedException();
     if (email == 'foo@bar.com') throw UserNotFoundAuthException();
     if (password == 'foobar') throw WrongPasswordAuthException();
-    var user = AuthUser(isEmailVerified: false, email: email);
+    const user = AuthUser(
+      isEmailVerified: false,
+      email: 'foo@bar.com',
+    );
     _user = user;
     return Future.value(user);
     // what is the difference between Future.value and Future.delayed?
@@ -129,18 +132,21 @@ class MockAuthProvider implements AuthProvider {
 
   @override
   Future<void> logOut() async {
-    if (!isInitialized) throw NotInitializedAuthException();
-    if (_user == null) throw UserNotLoggedInAuthException();
+    if (!isInitialized) throw NotInitializedException();
+    if (_user == null) throw UserNotFoundAuthException();
     await Future.delayed(const Duration(seconds: 1));
     _user = null;
   }
 
   @override
   Future<void> sendEmailVerification() async {
-    if (!isInitialized) throw NotInitializedAuthException();
+    if (!isInitialized) throw NotInitializedException();
     final user = _user;
     if (user == null) throw UserNotFoundAuthException();
-    var newUser = AuthUser(isEmailVerified: true, email: user.email);
+    const newUser = AuthUser(
+      isEmailVerified: true,
+      email: 'foo@bar.com',
+    );
     _user = newUser;
   }
 }

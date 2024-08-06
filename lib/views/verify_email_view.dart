@@ -3,10 +3,10 @@ import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 
 class VerifyEmailView extends StatefulWidget {
-  const VerifyEmailView({super.key});
+  const VerifyEmailView({Key? key}) : super(key: key);
 
   @override
-  State<VerifyEmailView> createState() => _VerifyEmailViewState();
+  _VerifyEmailViewState createState() => _VerifyEmailViewState();
 }
 
 class _VerifyEmailViewState extends State<VerifyEmailView> {
@@ -20,14 +20,12 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
       body: Column(
         children: [
           const Text(
-            "we've sent an email to your email address, Please open it to verify your account",
-          ),
+              "We've sent you an email verification. Please open it to verify your account."),
           const Text(
-            'If you did not receive the email, please press the button below to resend it.',
-          ),
+              "If you haven't received a verification email yet, press the button below"),
           TextButton(
             onPressed: () async {
-              AuthService.firebase().sendEmailVerification();
+              await AuthService.firebase().sendEmailVerification();
             },
             child: const Text('Send verification email',
                 style: TextStyle(color: Colors.blue)),
@@ -41,7 +39,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
               );
             },
             child: const Text('Restart'),
-          ),
+          )
         ],
       ),
     );

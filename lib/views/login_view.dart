@@ -5,7 +5,7 @@ import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+  const LoginView({Key? key}) : super(key: key);
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -38,21 +38,23 @@ class _LoginViewState extends State<LoginView> {
       body: Column(
         children: [
           TextField(
-              controller: _email,
-              enableSuggestions: false,
-              autocorrect: false,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                hintText: 'Enter your email here',
-              )),
+            controller: _email,
+            enableSuggestions: false,
+            autocorrect: false,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              hintText: 'Enter your email here',
+            ),
+          ),
           TextField(
-              controller: _password,
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-              decoration: const InputDecoration(
-                hintText: 'Enter your password here',
-              )),
+            controller: _password,
+            obscureText: true,
+            enableSuggestions: false,
+            autocorrect: false,
+            decoration: const InputDecoration(
+              hintText: 'Enter your password here',
+            ),
+          ),
           TextButton(
             onPressed: () async {
               final email = _email.text;
@@ -64,12 +66,13 @@ class _LoginViewState extends State<LoginView> {
                 );
                 final user = AuthService.firebase().currentUser;
                 if (user?.isEmailVerified ?? false) {
-                  // ignore: use_build_context_synchronously
+                  // user's email is verified
                   Navigator.of(context).pushNamedAndRemoveUntil(
                     notesRoute,
                     (route) => false,
                   );
                 } else {
+                  // user's email is NOT verified
                   Navigator.of(context).pushNamedAndRemoveUntil(
                     verifyEmailRoute,
                     (route) => false,
